@@ -27,7 +27,7 @@ def gitVersion() {
     def branch = grgit.branch.current().name
     if (tag.startsWith(branch))
         branch = 'master'
-    return "${tag}.${offset}${t -> if (branch != 'master') t << '-' + branch}"
+    return "${tag}.${offset}${t -> if (branch != 'master' && branch != 'develop') t << '-' + branch}"
 }
 
 dependencies {
