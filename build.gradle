@@ -2,42 +2,95 @@ plugins {
     id 'java-gradle-plugin'
     id 'groovy'
 
-    id 'com.gradle.plugin-publish' version '0.12.0'
-    id 'org.cadixdev.licenser' version '0.5.0'
+    id 'org.cadixdev.licenser' version '0.6.0'
+    id 'org.ajoberstar.grgit' version '4.1.0'
+    id 'maven-publish'
 }
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
-
-group = 'uk.jamierocks'
-version = '1.3.3-SNAPSHOT'
+group = 'net.minecraftforge'
+version = gitVersion()
+System.out.println("Version: " + version)
 description = 'ProPatcher is a Gradle plugin for creating .patch files on the go.'
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
 repositories {
     mavenCentral()
 }
 
-dependencies {
-    compile gradleApi()
-    compile localGroovy()
+def gitVersion() {
+    def raw = grgit.describe(longDescr: true, tags:true)
+    def desc = (raw == null ? '0.0-0-unknown' : grgit.describe(longDescr: true, tags:true)).split('-') as List
+    def hash = desc.remove(desc.size() - 1)
+    def offset = desc.remove(desc.size() - 1)
+    def tag = desc.join('-')
+    def branch = grgit.branch.current().name
+    if (tag.startsWith(branch))
+        branch = 'master'
+    return "${tag}.${offset}${t -> if (branch != 'master') t << '-' + branch}"
+}
 
-    compile 'com.cloudbees:diff4j:1.2'
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+
+    implementation 'com.cloudbees:diff4j:1.2'
 }
 
 license {
     header file('HEADER.txt')
 }
 
-pluginBundle {
-    website = 'https://www.cadixdev.org/'
-    vcsUrl = 'https://github.com/CadixDev/ProPatcher'
-    description = project.description
-    tags = ['patches']
+publishing {
+    publications.create("mavenJava", MavenPublication) {
+        from components.java
 
-    plugins {
-        propatcherPlugin {
-            id = 'uk.jamierocks.propatcher'
-            displayName = 'propatcher'
+        pom {
+            name = 'ProPatcher'
+            description = project.description
+            url = 'https://github.com/MinecraftForge/ProPatcher'
+            scm {
+                url = 'https://github.com/MinecraftForge/ProPatcher'
+                connection = 'scm:git:git://github.com/MinecraftForge/ProPatcher.git'
+                developerConnection = 'scm:git:git@github.com:MinecraftForge/ProPatcher.git'
+            }
+            issueManagement {
+                system = 'github'
+                url = 'https://github.com/MinecraftForge/ProPatcher/issues'
+            }
+
+            licenses {
+                license {
+                    name = 'MIT'
+                }
+            }
+
+            developers {
+                developer {
+                    id = 'jamierocks'
+                    name = 'Jamie Mansfield'
+                }
+                developer {
+                    id = 'LexManos'
+                    name = 'Lex Manos'
+                }
+            }
+        }
+    }
+    repositories {
+        maven {
+            if (System.env.MAVEN_USER) {
+                url 'https://maven.minecraftforge.net/'
+                authentication {
+                    basic(BasicAuthentication)
+                }
+                credentials {
+                    username = System.env.MAVEN_USER ?: 'not'
+                    password = System.env.MAVEN_PASSWORD ?: 'set'
+                }
+            } else {
+                url 'file://' + rootProject.file('repo').getAbsolutePath()
+            }
         }
     }
 }
