@@ -29,7 +29,7 @@ import com.cloudbees.diff.Diff
 import groovy.io.FileType
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.Input
-import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 
@@ -39,9 +39,9 @@ import java.util.zip.ZipFile
 
 class MakePatchesTask extends DefaultTask {
 
-    @InputFile File root
-    @InputFile File target
-    @InputFile File patches
+    @Input String root
+    @InputDirectory File target
+    @InputDirectory File patches
     @Input @Optional String originalPrefix = 'a/'
     @Input @Optional String modifiedPrefix = 'b/'
     @Input boolean ignoreWhitespace = true
@@ -61,7 +61,8 @@ class MakePatchesTask extends DefaultTask {
         if (!patches.exists())
             patches.mkdirs()
 
-        process(root, target) // Make the patches
+        def rootFile = new File(root)
+        process(rootFile, target) // Make the patches
     }
 
     void process(File root, File target) {
