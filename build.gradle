@@ -2,32 +2,19 @@ plugins {
     id 'java-gradle-plugin'
     id 'groovy'
 
-    id 'org.cadixdev.licenser' version '0.6.0'
-    id 'org.ajoberstar.grgit' version '4.1.0'
+    id 'org.cadixdev.licenser' version '0.6.1'
+    id 'net.minecraftforge.gradleutils' version '2.+'
     id 'maven-publish'
 }
 
 group = 'net.minecraftforge'
-version = gitVersion()
-System.out.println("Version: " + version)
+version = gradleutils.getTagOffsetVersion()
 description = 'ProPatcher is a Gradle plugin for creating .patch files on the go.'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
 repositories {
     mavenCentral()
-}
-
-def gitVersion() {
-    def raw = grgit.describe(longDescr: true, tags:true)
-    def desc = (raw == null ? '0.0-0-unknown' : grgit.describe(longDescr: true, tags:true)).split('-') as List
-    def hash = desc.remove(desc.size() - 1)
-    def offset = desc.remove(desc.size() - 1)
-    def tag = desc.join('-')
-    def branch = grgit.branch.current().name
-    if (tag.startsWith(branch))
-        branch = 'master'
-    return "${tag}.${offset}${t -> if (branch != 'master' && branch != 'develop') t << '-' + branch}"
 }
 
 dependencies {
@@ -78,19 +65,10 @@ publishing {
         }
     }
     repositories {
-        maven {
-            if (System.env.MAVEN_USER) {
-                url 'https://maven.minecraftforge.net/'
-                authentication {
-                    basic(BasicAuthentication)
-                }
-                credentials {
-                    username = System.env.MAVEN_USER ?: 'not'
-                    password = System.env.MAVEN_PASSWORD ?: 'set'
-                }
-            } else {
-                url 'file://' + rootProject.file('repo').getAbsolutePath()
-            }
-        }
+        maven gradleutils.getPublishingForgeMaven()
     }
+}
+
+changelog {
+    fromTag '1.0'
 }
