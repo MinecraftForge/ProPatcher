@@ -28,7 +28,9 @@ package uk.jamierocks.propatcher.task
 import com.cloudbees.diff.Diff
 import groovy.io.FileType
 import org.gradle.api.DefaultTask
+import org.gradle.api.InvalidUserDataException
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
@@ -39,12 +41,13 @@ import java.util.zip.ZipFile
 
 class MakePatchesTask extends DefaultTask {
 
-    @InputFile File root
-    @InputFile File target
-    @InputFile File patches
+    @InputFile @Optional File rootZip = null
+    @InputDirectory @Optional File rootDir = null
+    @InputDirectory File target
+    @InputDirectory File patches
     @Input @Optional String originalPrefix = 'a/'
     @Input @Optional String modifiedPrefix = 'b/'
-    @Input boolean ignoreWhitespace = true
+    private boolean ignoreWhitespace = true
 
     static def relative(base, file) {
         return file.path.substring(base.path.length() + 1).replaceAll(Matcher.quoteReplacement(File.separator), '/') //Replace is to normalize windows to linux/zip format
@@ -56,11 +59,23 @@ class MakePatchesTask extends DefaultTask {
         dirs.reverse().each{ it.delete() } //Do it in reverse order do we delete deepest first
     }
 
+    @Input
+    boolean getIgnoreWhitespace() {
+        return ignoreWhitespace
+    }
+
+    void setIgnoreWhitespace(boolean ignoreWhitespace) {
+        this.ignoreWhitespace = ignoreWhitespace
+    }
+
     @TaskAction
     void doTask() {
         if (!patches.exists())
             patches.mkdirs()
 
+        def root = rootZip == null ? rootDir : rootZip
+        if (root == null)
+            throw new InvalidUserDataException("At least one of rootZip and rootDir has to be specified!")
         process(root, target) // Make the patches
     }
 

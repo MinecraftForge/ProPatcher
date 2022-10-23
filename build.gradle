@@ -2,7 +2,7 @@ plugins {
     id 'java-gradle-plugin'
     id 'groovy'
 
-    id 'org.cadixdev.licenser' version '0.6.0'
+    id 'org.cadixdev.licenser' version '0.6.1'
     id 'org.ajoberstar.grgit' version '4.1.0'
     id 'maven-publish'
 }

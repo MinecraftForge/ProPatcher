@@ -31,13 +31,13 @@ import com.cloudbees.diff.ContextualPatch
 import com.cloudbees.diff.ContextualPatch.PatchStatus
 import com.cloudbees.diff.PatchException
 import org.gradle.api.DefaultTask
-import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.TaskAction
 
 class ApplyPatchesTask extends DefaultTask {
 
-    @InputFile File target
-    @InputFile File patches
+    @InputDirectory File target
+    @InputDirectory File patches
 
     @TaskAction
     void doTask() {
@@ -63,8 +63,12 @@ class ApplyPatchesTask extends DefaultTask {
                 }
             }
         }
+
+        // Patches should always use /dev/null rather than any platform-specific locations, it should
+        // be standardised across systems.
+        // To the effect, we should clean up our messes - so delete any directories we make on Windows.
         def NUL = new File('/dev/null')
-        if (System.getProperty('os.name').toLowerCase().contains('win') && NUL.exists()) //patcher is standerdized to create /dev/null targets even on windows, so delete this to clean that up
+        if (System.getProperty('os.name').toLowerCase().contains('win') && NUL.exists())
             NUL.delete()
             
         if (failed)

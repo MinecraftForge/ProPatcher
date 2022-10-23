@@ -26,17 +26,22 @@
 package uk.jamierocks.propatcher
 
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputDirectory
 import org.gradle.api.tasks.InputFile
+import org.gradle.api.tasks.Optional
 
 class ProPatcherExtension {
 
-    @InputFile
-    File root
+    @InputFile @Optional
+    File rootZip = null
 
-    @InputFile
+    @InputDirectory @Optional
+    File rootDir = null
+
+    @InputDirectory
     File target
 
-    @InputFile
+    @InputDirectory
     File patches
 
     @Input
