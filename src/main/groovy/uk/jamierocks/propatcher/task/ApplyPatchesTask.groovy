@@ -32,6 +32,7 @@ import com.cloudbees.diff.ContextualPatch.PatchStatus
 import com.cloudbees.diff.PatchException
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.InputDirectory
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 
@@ -39,7 +40,7 @@ class ApplyPatchesTask extends DefaultTask {
 
     @InputDirectory File target
     @InputDirectory File patches
-    @OutputDirectory @org.gradle.api.tasks.Optional File rejects
+    @OutputDirectory @Optional File rejects
 
     @TaskAction
     void doTask() {
@@ -60,7 +61,6 @@ class ApplyPatchesTask extends DefaultTask {
                             File output = new File(rejects, patches.relativePath(file))
                             output.parentFile.mkdirs()
                             output.createNewFile()
-                            println output.getAbsolutePath()
                             output.newOutputStream() << file.readBytes()
                         }
                         println 'Failed to apply: ' + file
