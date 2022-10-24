@@ -79,8 +79,9 @@ class ApplyPatchesTask extends DefaultTask {
         def NUL = new File('/dev/null')
         if (System.getProperty('os.name').toLowerCase().contains('win') && NUL.exists())
             NUL.delete()
-
+            
         if (failed)
             throw new RuntimeException('One or more patches failed to apply, see log for details')
     }
+
 }
