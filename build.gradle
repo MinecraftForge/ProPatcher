@@ -13,6 +13,8 @@ description = 'ProPatcher is a Gradle plugin for creating .patch files on the go
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(8)
 
+println 'Version: ' + version
+
 repositories {
     mavenCentral()
 }
